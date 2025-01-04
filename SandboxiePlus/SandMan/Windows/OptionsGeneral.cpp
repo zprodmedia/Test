@@ -242,6 +242,8 @@ void COptionsWindow::CreateGeneral()
 	connect(ui.btnCmdDown, SIGNAL(clicked(bool)), this, SLOT(OnCommandDown()));
 	connect(ui.btnDelCmd, SIGNAL(clicked(bool)), this, SLOT(OnDelCommand()));
 	connect(ui.treeRun, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(OnRunChanged()));
+
+	connect(ui.txtNotes, SIGNAL(textChanged()), this, SLOT(OnGeneralChanged()));
 }
 
 void COptionsWindow::LoadGeneral()
@@ -363,7 +365,7 @@ void COptionsWindow::LoadGeneral()
 	ui.txtCopyLimit->setText(QString::number(iLimit > 0 ? iLimit : 80 * 1024));
 	ui.chkCopyPrompt->setChecked(m_pBox->GetBool("PromptForFileMigration", true));
 	ui.chkNoCopyWarn->setChecked(!m_pBox->GetBool("CopyLimitSilent", false));
-	ui.chkDenyWrite->setChecked(m_pBox->GetBool("CopyBlockDenyWrite", false));
+	ui.chkDenyWrite->setChecked(!m_pBox->GetBool("CopyBlockDenyWrite", false));
 	ui.chkNoCopyMsg->setChecked(m_pBox->GetBool("NotifyNoCopy", false));
 	
 	LoadCopyRules();
@@ -380,6 +382,8 @@ void COptionsWindow::LoadGeneral()
 	ui.chkRawDiskNotify->setChecked(m_pBox->GetBool("NotifyDirectDiskAccess", false));
 
 	ui.chkAllowEfs->setChecked(m_pBox->GetBool("EnableEFS", false));
+
+	ui.txtNotes->setPlainText(m_pBox->GetTextList("Note", false).join("\n"));
 
 	OnGeneralChanged();
 
@@ -452,7 +456,7 @@ void COptionsWindow::SaveGeneral()
 	//WriteTextList("RunCommand", RunCommands);
 	m_pBox->DelValue("RunCommand");
 	foreach(const QString& Value, RunCommands)
-		m_pBox->InsertText("RunCommand", Value);
+		m_pBox->AppendText("RunCommand", Value);
 
 
 	if (ui.cmbVersion->isEnabled()) 
@@ -492,7 +496,7 @@ void COptionsWindow::SaveGeneral()
 
 	WriteAdvancedCheck(ui.chkCopyPrompt, "PromptForFileMigration", "", "n");
 	WriteAdvancedCheck(ui.chkNoCopyWarn, "CopyLimitSilent", "", "y");
-	WriteAdvancedCheck(ui.chkDenyWrite, "CopyBlockDenyWrite", "y", "");
+	WriteAdvancedCheck(ui.chkDenyWrite, "CopyBlockDenyWrite", "", "y");
 	WriteAdvancedCheck(ui.chkNoCopyMsg, "NotifyNoCopy", "y", "");
 
 	if (ui.chkProtectBox->checkState() == Qt::Checked) {
@@ -513,6 +517,10 @@ void COptionsWindow::SaveGeneral()
 	WriteAdvancedCheck(ui.chkRawDiskNotify, "NotifyDirectDiskAccess", "y", "");
 
 	WriteAdvancedCheck(ui.chkAllowEfs, "EnableEFS", "y", "");
+
+	m_pBox->DelValue("Note");
+	foreach(const QString& Value, ui.txtNotes->toPlainText().split("\n"))
+		m_pBox->AppendText("Note", Value);
 
 	m_GeneralChanged = false;
 }
