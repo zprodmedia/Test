@@ -97,6 +97,7 @@ BOOLEAN Dll_IsWow64 = FALSE;
 #endif
 #ifdef _M_ARM64EC
 BOOLEAN Dll_IsArm64ec = FALSE;
+void* Dll_xtajit64 = NULL;
 #endif
 #ifndef _WIN64
 BOOLEAN Dll_IsXtAjit = FALSE;
@@ -663,6 +664,8 @@ _FX ULONG Dll_GetImageType(const WCHAR *ImageName)
                 ImageType = DLL_IMAGE_OTHER_WEB_BROWSER;
             else if (_wcsicmp(L"mail", buf) == 0)
                 ImageType = DLL_IMAGE_OTHER_MAIL_CLIENT;
+            else if (_wcsicmp(L"plugin", buf) == 0)
+                ImageType = DLL_IMAGE_PLUGIN_CONTAINER;
             else
                 ImageType = DLL_IMAGE_LAST; // invalid type set place holder such that we keep this image uncustomized
 
@@ -815,6 +818,7 @@ _FX VOID Dll_Ordinal1(INJECT_DATA * inject)
 #endif
 #ifdef _M_ARM64EC
     Dll_IsArm64ec = data->flags.is_arm64ec == 1; // x64 on arm64
+	Dll_xtajit64 = GetModuleHandle(L"xtajit64.dll");
 #endif
 #ifndef _WIN64
     Dll_IsXtAjit = data->flags.is_xtajit == 1; // x86 on arm64
